@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+option go_package = "github.com/fernandoocampo/players/pkg/pbs/players";
+
+package players;
+
+// service to handle players.
+service PlayerHandler {
+  // Crete player
+  rpc CreatePlayer (CreatePlayerRequest) returns (CreatePlayerReply) {}
+  // Update player
+  rpc UpdatePlayer (UpdatePlayerRequest) returns (UpdatePlayerReply) {}
+  // Delete Player
+  rpc DeletePlayer (DeletePlayerRequest) returns (DeletePlayerReply) {}
+  // Search players
+  rpc SearchPlayers (SearchPlayersRequest) returns (SearchPlayersReply) {}
+}
+
+// The request message contains data to create players.
+message CreatePlayerRequest {
+  string firstname = 1;
+  string lastname  = 2;
+  string nickname  = 3;
+  string email     = 4;
+  string password  = 5;
+  string country   = 6;
+}
+
+// The response message contain result after trying to create a player.
+message CreatePlayerReply {
+  string player_id    = 1;
+  string message = 2;
+}
+
+// The request message contains data to update players.
+message UpdatePlayerRequest {
+  string player_id    = 1;    
+  string firstname = 2;
+  string lastname  = 3;
+  string nickname  = 4;
+  string email     = 5;
+  string password  = 6;
+  string country   = 7;
+}
+
+// The response message contain result after trying to update a player.
+message UpdatePlayerReply {
+  bool ok = 1;
+  string message = 2;
+}
+
+// The request message contains data to delete players.
+message DeletePlayerRequest {
+  string player_id    = 1;
+}
+
+// The response message contain result after trying to delete a player.
+message DeletePlayerReply {
+  bool ok = 1;
+  string message = 2;
+}
+
+// The request message contains data to search players.
+message SearchPlayersRequest {
+  // criteria value to search players in that country
+	string country = 1;
+	// determines the number of rows.
+	uint32 limit = 2;
+	// skips the offset rows before beginning to return the rows.
+	uint32 offset = 3;
+}
+
+// The response message contain result after trying to search a player.
+message SearchPlayersReply {
+  string message = 1;
+  repeated PlayerItem player_items = 2;
+	// Total total number of players that match the search criteria.
+	int64 total = 3;
+	// determines the number of rows.
+	uint32 limit = 4;
+	// skips the offset rows before beginning to return the rows.
+	uint32 offset = 5;
+}
+
+// item value to use with search players result.
+message PlayerItem {
+  string id        = 1;
+	string firstname = 2;
+	string lastname  = 3;
+	string nickname  = 4;
+	string country   = 5;
+}

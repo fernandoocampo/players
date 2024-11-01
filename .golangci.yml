@@ -1,0 +1,55 @@
+run:
+  # Include test files or not.
+  # Default: true
+  tests: false
+linters:
+  enable-all: true
+  disable:
+    - gomnd
+    - execinquery
+    - exportloopref
+    - depguard
+linters-settings:
+  tagliatelle:
+    # Check the struck tag name case.
+    case:
+      # Use the struct field name to check the name of the struct tag.
+      # Default: false
+      use-field-name: false
+      rules:
+        # Any struct tag type can be used.
+        # Support string case: `camel`, `pascal`, `kebab`, `snake`, `goCamel`, `goPascal`, `goKebab`, `goSnake`, `upper`, `lower`
+        json:     snake
+        yaml:     camel
+        xml:      camel
+        whatever: kebab
+  lll:
+    # max line length, lines longer will be reported. Default is 120.
+    # '\t' is counted as 1 character by default, and can be changed with the tab-width option
+    line-length: 140
+issues:
+  exclude-rules:
+    # Exclude some linters from running on app file.
+    - path: internal/application/app.go
+      linters:
+        - gochecknoglobals
+    # Exclude some linters appkit.
+    - path-except: internal/appkit/unittests\.go
+      linters:
+        - wrapcheck
+        - forcetypeassert
+        - exhaustruct
+        - gosec
+        - gochecknoglobals
+        - mnd
+        - perfsprint
+    - path-except: internal/appkit/e2etests\.go
+      linters:
+        - wrapcheck
+        - forcetypeassert
+        - exhaustruct
+        - gosec
+        - gochecknoglobals
+        - mnd
+        - perfsprint
+        - varnamelen

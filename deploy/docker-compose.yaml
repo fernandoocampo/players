@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  database:
+    image: postgres:16.2
+    environment:
+      POSTGRES_PLAYER: playersdb
+      POSTGRES_PASSWORD: playerspwd
+      POSTGRES_DB: playersdb
+    volumes:
+      - ${PWD}/db-data/:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+
+  service:
+    image: players-service:local-0.1.0
+    environment:
+      PLAYERS_POSTGRES_PLAYER: ${PLAYERS_POSTGRES_PLAYER}
+      PLAYERS_POSTGRES_PASSWORD: ${PLAYERS_POSTGRES_PASSWORD}
+      PLAYERS_POSTGRES_DB: ${PLAYERS_POSTGRES_DB}
+      PLAYERS_POSTGRES_PORT: ${PLAYERS_POSTGRES_PORT}
+      PLAYERS_POSTGRES_HOST: database
+      PLAYERS_LOG_LEVEL: ${PLAYERS_LOG_LEVEL}
+      PLAYERS_WEB_SERVER_PORT: ${PLAYERS_WEB_SERVER_PORT}
+      PLAYERS_GRPC_SERVER_PORT: ${PLAYERS_GRPC_SERVER_PORT}
+      PLAYERS_PASSWORD_GENERATION_COST: ${PLAYERS_PASSWORD_GENERATION_COST}
+    ports:
+      - 8080:8080
+      - 50051:50051
+    depends_on:
+      - database
+    networks:
+      - mynetwork
+    restart: on-failure
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.111.0
+    ports:
+      - "4317:4317"  # OTLP gRPC
+      #- "4318:4318"  # OTLP HTTP
+    volumes:
+      - ${PWD}/deploy/otelcol-config.yaml:/etc/otelcol/config.yaml
+      - ${PWD}/otelcol-traces.log:/var/log/otel-traces.log
+    command: ["--config", "/etc/otelcol/config.yaml"]
+    depends_on:
+        - jaeger
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.40
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "4317"
+      - "14268:14268"  # HTTP collector port
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC collector port
+networks:
+  mynetwork:
+    driver: bridge
